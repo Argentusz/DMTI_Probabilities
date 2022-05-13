@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"time"
 )
@@ -17,113 +18,45 @@ func ExpectedValue(PA, PB float32) float32 {
 	return 2*((1-PA)*PB) - 3*(PA*(1-PB)) - 1*((1-PA)*PB) + 2*(PA*(1-PB))
 }
 
+func StdDeviation(expValue, res float32) float32 {
+	return float32(math.Pow(math.Pow(float64(expValue), 2)+math.Pow(float64(res), 2), 0.5))
+}
+
+func Dispersion(expValue, res float32) float32 {
+	return float32(math.Pow(float64(res-expValue), 2)) / 2
+}
+
 func RandomZeroOne(p float32) int {
 	rand.Seed(time.Now().UnixNano())
 	random := rand.Float32()
 	if random < p {
-		return 1
+		return 0
 	}
-	return 0
+	return 1
 }
 
-func Picking(A, B *Player) {
-	A.Current = RandomZeroOne(0.5)
-	B.Current = RandomZeroOne(0.5)
+func Picking(A, B *Player, p1, p2 float32) {
+	A.Current = RandomZeroOne(p1)
+	B.Current = RandomZeroOne(p2)
 	A.ChoicesLog = append(A.ChoicesLog, A.Current)
 	B.ChoicesLog = append(B.ChoicesLog, B.Current)
 }
 
-func PickingBSmarter(A, B *Player) {
-	A.Current = RandomZeroOne(0.5)
-	B.Current = RandomZeroOne(0.25)
-	A.ChoicesLog = append(A.ChoicesLog, A.Current)
-	B.ChoicesLog = append(B.ChoicesLog, B.Current)
-}
-
-func PickingABalls(A, B *Player) float32 {
-	A.Current = RandomZeroOne(float32(A.Balls[0]) / float32(A.Balls[0]+A.Balls[1]))
-	B.Current = RandomZeroOne(0.5)
-	A.ChoicesLog = append(A.ChoicesLog, A.Current)
-	B.ChoicesLog = append(B.ChoicesLog, B.Current)
-	return float32(A.Balls[0]) / float32(A.Balls[0]+A.Balls[1])
-}
-
-func PickingABBalls(A, B *Player) (float32, float32) {
-	A.Current = RandomZeroOne(float32(A.Balls[0]) / float32(A.Balls[0]+A.Balls[1]))
-	B.Current = RandomZeroOne(float32(B.Balls[0]) / float32(B.Balls[0]+B.Balls[1]))
-	A.ChoicesLog = append(A.ChoicesLog, A.Current)
-	B.ChoicesLog = append(B.ChoicesLog, B.Current)
-	return float32(A.Balls[0]) / float32(A.Balls[0]+A.Balls[1]), float32(B.Balls[0]) / float32(B.Balls[0]+B.Balls[1])
-}
-
-func Judge(A, B *Player) bool {
+func Judge(A, B *Player) int {
 	if A.Current == B.Current {
 		A.Score += 2
 		B.Score -= 2
-		return true
+		return 2
 	}
-	if A.Current == 0 {
+	if A.Current == 1 {
 		A.Score -= 1
 		B.Score += 1
+		return -1
 	} else {
 		A.Score -= 3
 		B.Score += 3
+		return -3
 	}
-	return false
-}
-
-func JudgeWithABalls(A, B *Player) bool {
-	if A.Current == B.Current {
-		A.Score += 2
-		B.Score -= 2
-		A.Balls[A.Current] += 2
-		return true
-	}
-	if A.Current == 0 {
-		A.Score -= 1
-		B.Score += 1
-	} else {
-		A.Score -= 3
-		B.Score += 3
-	}
-	return false
-}
-
-func JudgeWithABallsPunished(A, B *Player) bool {
-	if A.Current == B.Current {
-		A.Score += 2
-		B.Score -= 2
-		return true
-	}
-	if A.Current == 0 {
-		A.Score -= 1
-		B.Score += 1
-		A.Balls[0] -= 1
-	} else {
-		A.Score -= 3
-		B.Score += 3
-		A.Balls[1] -= 3
-	}
-	return false
-}
-
-func JudgeWithABBalls(A, B *Player) bool {
-	if A.Current == B.Current {
-		A.Score += 2
-		B.Score -= 2
-		A.Balls[A.Current] += 2
-		return true
-	}
-	if A.Current == 0 {
-		A.Score -= 1
-		B.Score += 1
-		B.Balls[1] += 1
-	} else {
-		A.Score -= 3
-		B.Score += 3
-		B.Balls[0] += 3
-	}
-	return false
 }
 
 func first() {
@@ -131,7 +64,7 @@ func first() {
 	const PA = 0.5
 	const PB = 0.5
 	for i := 0; i < 100; i++ {
-		Picking(&A, &B)
+		Picking(&A, &B, PA, PB)
 		Judge(&A, &B)
 	}
 	fmt.Println("Итог:")
@@ -147,7 +80,7 @@ func second() {
 	const PA float32 = 0.5
 	const PB float32 = 0.25
 	for i := 0; i < 100; i++ {
-		PickingBSmarter(&A, &B)
+		Picking(&A, &B, PA, PB)
 		Judge(&A, &B)
 	}
 	fmt.Println("Итог:")
@@ -164,8 +97,11 @@ func third() {
 	var PA float32
 	A.Balls = append(A.Balls, 10, 10)
 	for i := 0; i < 100; i++ {
-		PA = PickingABalls(&A, &B)
-		JudgeWithABalls(&A, &B)
+		Picking(&A, &B, PA, PB)
+		if Judge(&A, &B) > 0 {
+			A.Balls[A.Current] += 2
+		}
+		PA = float32(A.Balls[0]) / float32(A.Balls[0]+A.Balls[1])
 	}
 	fmt.Println("Итог:")
 	fmt.Println("Игрок А: ", A.Score, "Среднее значение: ", float32(A.Score)/100)
@@ -177,11 +113,15 @@ func third() {
 func fourth() {
 	var A, B Player
 	const PB float32 = 0.5
-	var PA float32
 	A.Balls = append(A.Balls, 100, 100)
+	var PA = float32(A.Balls[0]) / float32(A.Balls[0]+A.Balls[1])
 	for i := 0; i < 100; i++ {
-		PA = PickingABalls(&A, &B)
-		JudgeWithABallsPunished(&A, &B)
+		Picking(&A, &B, PA, PB)
+		temp := Judge(&A, &B)
+		if temp < 0 {
+			A.Balls[A.Current] += temp
+		}
+		PA = float32(A.Balls[0]) / float32(A.Balls[0]+A.Balls[1])
 	}
 	fmt.Println("Итог:")
 	fmt.Println("Игрок А: ", A.Score, "Среднее значение: ", float32(A.Score)/100)
@@ -193,12 +133,18 @@ func fourth() {
 
 func fifth() {
 	var A, B Player
-	var PA, PB float32
 	A.Balls = append(A.Balls, 10, 10)
 	B.Balls = append(B.Balls, 10, 10)
+	var PA, PB = float32(A.Balls[0]) / float32(A.Balls[0]+A.Balls[1]), float32(B.Balls[0]) / float32(B.Balls[0]+B.Balls[1])
 	for i := 0; i < 100; i++ {
-		PA, PB = PickingABBalls(&A, &B)
-		JudgeWithABBalls(&A, &B)
+		Picking(&A, &B, PA, PB)
+		temp := Judge(&A, &B)
+		if temp > 0 {
+			A.Balls[A.Current] += temp
+		} else {
+			B.Balls[B.Current] -= temp
+		}
+		PA, PB = float32(A.Balls[0])/float32(A.Balls[0]+A.Balls[1]), float32(B.Balls[0])/float32(B.Balls[0]+B.Balls[1])
 	}
 	fmt.Println("Итог:")
 	fmt.Println("Игрок А: ", A.Score, "Среднее значение: ", float32(A.Score)/100)
