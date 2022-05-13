@@ -10,6 +10,7 @@ type Player struct {
 	Score      int
 	Current    int
 	ChoicesLog []int
+	Balls      []int
 }
 
 func RandomZeroOne(p float32) int {
@@ -35,6 +36,13 @@ func PickingBSmarter(A, B *Player) {
 	B.ChoicesLog = append(B.ChoicesLog, B.Current)
 }
 
+func PickingABalls(A, B *Player) {
+	A.Current = RandomZeroOne(float32(A.Balls[0]) / float32(A.Balls[0]+A.Balls[1]))
+	B.Current = RandomZeroOne(0.5)
+	A.ChoicesLog = append(A.ChoicesLog, A.Current)
+	B.ChoicesLog = append(B.ChoicesLog, B.Current)
+}
+
 func Judge(A, B *Player) bool {
 	if A.Current == B.Current {
 		A.Score += 2
@@ -47,6 +55,41 @@ func Judge(A, B *Player) bool {
 	} else {
 		A.Score -= 3
 		B.Score += 3
+	}
+	return false
+}
+
+func JudgeWithABalls(A, B *Player) bool {
+	if A.Current == B.Current {
+		A.Score += 2
+		B.Score -= 2
+		A.Balls[A.Current] += 2
+		return true
+	}
+	if A.Current == 0 {
+		A.Score -= 1
+		B.Score += 1
+	} else {
+		A.Score -= 3
+		B.Score += 3
+	}
+	return false
+}
+
+func JudgeWithABallsPunished(A, B *Player) bool {
+	if A.Current == B.Current {
+		A.Score += 2
+		B.Score -= 2
+		return true
+	}
+	if A.Current == 0 {
+		A.Score -= 1
+		B.Score += 1
+		A.Balls[0] -= 1
+	} else {
+		A.Score -= 3
+		B.Score += 3
+		A.Balls[1] -= 3
 	}
 	return false
 }
@@ -79,9 +122,42 @@ func second() {
 	fmt.Println("Математическое Ожидание игрока A: -0.25")
 }
 
+func third() {
+	var A, B Player
+	A.Balls = append(A.Balls, 10, 10)
+	for i := 0; i < 100; i++ {
+		PickingABalls(&A, &B)
+		JudgeWithABalls(&A, &B)
+	}
+	fmt.Println("Итог:")
+	fmt.Println("Игрок А: ", A.Score, "Среднее значение: ", float64(A.Score)/100)
+	fmt.Println("Игрок B: ", B.Score, "Среднее значение: ", float64(B.Score)/100)
+	fmt.Println("Выборы игрока А: ", A.ChoicesLog)
+	fmt.Println("Выборы игрока B: ", B.ChoicesLog)
+	fmt.Println("Математическое Ожидание игрока A: -0.25")
+}
+func fourth() {
+	var A, B Player
+	A.Balls = append(A.Balls, 100, 100)
+	for i := 0; i < 100; i++ {
+		PickingABalls(&A, &B)
+		JudgeWithABallsPunished(&A, &B)
+	}
+	fmt.Println("Итог:")
+	fmt.Println("Игрок А: ", A.Score, "Среднее значение: ", float64(A.Score)/100)
+	fmt.Println("Игрок B: ", B.Score, "Среднее значение: ", float64(B.Score)/100)
+	fmt.Println("Выборы игрока А: ", A.ChoicesLog)
+	fmt.Println("Выборы игрока B: ", B.ChoicesLog)
+	fmt.Println("Математическое Ожидание игрока A: -0.25")
+}
+
 func main() {
 	fmt.Println("Первый эксперимент:")
 	first()
 	fmt.Println("Второй эксперимент:")
 	second()
+	fmt.Println("Третий эксперимент:")
+	third()
+	fmt.Println("Четвёртый эксперимент:")
+	fourth()
 }
