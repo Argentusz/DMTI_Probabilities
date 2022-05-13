@@ -73,6 +73,9 @@ func first() {
 	fmt.Println("Выборы игрока А: ", A.ChoicesLog)
 	fmt.Println("Выборы игрока B: ", B.ChoicesLog)
 	fmt.Println("Математическое Ожидание игрока А:", ExpectedValue(PA, PB))
+	fmt.Println("Квадратичное отклонение:", StdDeviation(ExpectedValue(PA, PB), float32(A.Score)/100))
+	fmt.Println("Дисперсия:", Dispersion(ExpectedValue(PA, PB), float32(A.Score)/100))
+
 }
 
 func second() {
@@ -89,6 +92,9 @@ func second() {
 	fmt.Println("Выборы игрока А: ", A.ChoicesLog)
 	fmt.Println("Выборы игрока B: ", B.ChoicesLog)
 	fmt.Println("Математическое Ожидание игрока A:", ExpectedValue(PA, PB))
+	fmt.Println("Квадратичное отклонение:", StdDeviation(ExpectedValue(PA, PB), float32(A.Score)/100))
+	fmt.Println("Дисперсия:", Dispersion(ExpectedValue(PA, PB), float32(A.Score)/100))
+
 }
 
 func third() {
@@ -109,6 +115,9 @@ func third() {
 	fmt.Println("Выборы игрока А: ", A.ChoicesLog)
 	fmt.Println("Выборы игрока B: ", B.ChoicesLog)
 	fmt.Println("Математическое Ожидание игрока A:", ExpectedValue(PA, PB))
+	fmt.Println("Квадратичное отклонение:", StdDeviation(ExpectedValue(PA, PB), float32(A.Score)/100))
+	fmt.Println("Дисперсия:", Dispersion(ExpectedValue(PA, PB), float32(A.Score)/100))
+
 }
 func fourth() {
 	var A, B Player
@@ -129,6 +138,9 @@ func fourth() {
 	fmt.Println("Выборы игрока А: ", A.ChoicesLog)
 	fmt.Println("Выборы игрока B: ", B.ChoicesLog)
 	fmt.Println("Математическое Ожидание игрока A:", ExpectedValue(PA, PB))
+	fmt.Println("Квадратичное отклонение:", StdDeviation(ExpectedValue(PA, PB), float32(A.Score)/100))
+	fmt.Println("Дисперсия:", Dispersion(ExpectedValue(PA, PB), float32(A.Score)/100))
+
 }
 
 func fifth() {
@@ -152,6 +164,9 @@ func fifth() {
 	fmt.Println("Выборы игрока А: ", A.ChoicesLog)
 	fmt.Println("Выборы игрока B: ", B.ChoicesLog)
 	fmt.Println("Математическое Ожидание игрока A:", ExpectedValue(PA, PB))
+	fmt.Println("Квадратичное отклонение:", StdDeviation(ExpectedValue(PA, PB), float32(A.Score)/100))
+	fmt.Println("Дисперсия:", Dispersion(ExpectedValue(PA, PB), float32(A.Score)/100))
+
 }
 
 func main() {
